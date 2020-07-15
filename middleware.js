@@ -2,6 +2,7 @@ const Posts = require('./posts/postDb.js');
 const Users = require('./users/userDb.js');
 
 module.exports = {
+
   logger: function (req, res, next) {
     console.log(`${req.method} Request, ${req.url}, ${Date()}`);
     next();
@@ -15,7 +16,6 @@ module.exports = {
       })
       .catch(err => {
         console.log(err)
-        // next(err)
         res.status(500).json({ message: "Not a valid user" })
       });
   },

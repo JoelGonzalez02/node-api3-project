@@ -40,10 +40,4 @@ server.use('/api/users/', userRouter);
 
 
 
-
-server.get('/', (req, res, next) => {
-  res.send(`<h2>Let's write some middleware!</h2>`);
-  next();
-});
-
 module.exports = server;

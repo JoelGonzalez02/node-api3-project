@@ -105,47 +105,84 @@ const {validatePostID} = require('../middleware.js');
 
 const router = express.Router();
 
-router.get('/', async (req, res, next) => {
-  try{
+router.get('/', async (req, res) => {
+
+  try {
+
     const posts = await Posts.get();
-    if(posts.length > 0) {
-      res.status(200).json(posts);
-    } else {res.status(404).json({
-      message: 'No posts available' });
-    }
-  } catch (error) {
-    next (error)
+
+      if (posts.length > 0) {
+        res.status(200).json(posts)
+      } else {
+        res.status(500).json({errorMessage: 'There was a problem retrieving the posts from the database'})
+      }
+
+  } catch {
+    res.status(500).json({errorMessage: 'There was an error getting the posts'})
   }
+  
+  
+  
 });
 
-router.get('/:id', validatePostID, async (req, res, next) => {
-    const post = await Posts.getById(req.params.id);
-    if (post) {
-      res.status(200).json(post);
-    } else {
-      console.log(error);
-      res.status(500).json({
-        error: "The post information could not be retreived"
-      });
-    }
-  });
+router.get('/:id', validatePostID, async (req, res) => {
+  
+  try {
 
-router.delete('/:id', validatePostID, async (req, res, next) => {
-    const post = await Posts.remove(req.params.id);
-    if (post) {
-      res.status(200).json(req.body)
-    } else {
-      console.log(error);
-      res.status(500).json({ error: "The post could not be removed"
-      });
-    }
-  });
+    const { id } = req.params;
+    const post = await Posts.getById(id);
 
-router.put('/:id', validatePostID, validatePost, async (req, res, next) => {
-    if (req.body.text){
-      const editPostInfo = await Posts.update(req.params.id, req.body)
-      res.status(201).json(editPostInfo);
+    if(post) {
+      res.status(200).json(post)
+    } else {
+      res.status(404).json({message: 'The post with the specified ID does not exist'})
     }
+  } catch {
+    res.status(500).json({errorMessage: 'There was a problem getting the post from the database'})
+  }
+
+});
+
+router.delete('/:id', validatePostID, async (req, res) => {
+  
+  try {
+    const { id } = req.params;
+    const post = await Posts.getById(id);
+
+    if (post) {
+      const deletedPost = await Posts.remove(id)
+      res.status(200).json(deletedPost)
+    } else {
+      res.status(404).json({message: 'The post with the specified ID does not exist'})
+    }
+  } catch {
+    res.status(500).json({errorMessage: 'There was a problem deleting the post from the database'})
+  }
+
+});
+
+router.put('/:id', validatePostID, async (req, res) => {
+
+  try {
+
+     const { id } = req.params;
+     const { body } = req;
+     const post = await Posts.getById(id);
+
+     if (post) {
+       if (body.text || body.text !== {}) {
+          const updatedPost = await Posts.update(id, body)
+          res.status(200).json(updatedPost)
+       } else {
+         res.status(400).json({message: 'Please enter some new text to edit your post'})
+       }
+     } else {
+       res.status(404).json({message: 'The post with the specified ID does not exist'})
+     }
+  } catch {
+    res.status(500).json({errorMessage: 'There was a problem updating your post'})
+  }
+ 
 });
 
 // custom middleware
