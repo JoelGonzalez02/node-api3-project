@@ -12,23 +12,56 @@ router.post('/', validateUser, async (req, res, next) => {
   res.status(200).json(user);
 });
 
-router.post('/:id/posts', validatePost, async (req, res) => {
+// router.post('/:id/posts', validatePost, async (req, res) => {
+
+//   try {
+//     const { user_id } = req.params;
+//     const { body } = req;
+//     const user = await Users.getById(user_id);
+
+//     if (user) {
+//       if (body.text || body.text !== '') {
+//         const newPost = await Posts.insert(body)
+//         res.status(201).json(newPost)
+//       } else {
+//         res.status(400).json({message: 'Please enter text for the post'})
+//       }
+//     } else {
+//       res.status(404).json({message: 'The user with the specified ID does not exist'})
+//     }
+    
+//   } catch {
+//     res.status(500).json({errorMessage: 'There was a problem adding your post'})
+//   }
+  
+// });
+
+
+router.post('/:id/posts', async (req,res) => {
+
 
   try {
-    const id = req.params;
-    const info = req.body;
-    
-    if (info.text || info.text !== {}) {
-      const newPost = await postDb.insert(id, info);
-      res.status(201).json(newPost)
-    } else {
-      res.status(400).json({message: 'Please enter text for the post'})
-    }
-  } catch {
-    res.status(500).json({errorMessage: 'There was a problem adding your post to the database'})
+
+  const id = req.params.id;
+  const post = {user_id: id, text: '', ...req.body}
+  const user = await Users.getById(id);
+
+
+      if (user) {
+          if (post.text !== '') {
+              const newPost = await Posts.insert(post)
+              res.status(201).json(newPost)
+          } else {
+              res.status(400).json({message: 'Please enter text for the post'})
+          }
+      } else {
+          res.status(404).json({message: 'The user with the specified ID does not exist'})
+      }
+  } catch(e) {
+      console.log(e)
+      res.status(500).json({errorMessage: 'There was an error saving your post to the database'})
   }
-  
-  
+
 });
 
 router.get('/', async (req, res) => {
