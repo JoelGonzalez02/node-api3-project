@@ -21,15 +21,16 @@ module.exports = {
   },
 
   validateUser: function (req, res, next) {
-    const UserInfo = req.body;
-    !UserInfo || UserInfo === {} ?
-    res.status(400).json({ message: 'missing user data' }) : !UserInfo.name || UserInfo.name === '' ? res.status(400).json({ message: 'missing required name field' }) :
+    const UserInfo = Object.keys(req.body);
+    UserInfo.length === 0 || UserInfo === {} ?
+    res.status(400).json({ message: 'Missing user data' }) : !req.body.name || req.body.name === '' ? res.status(400).json({ message: 'Missing required name field' }) :
     next();
   },
 
   validatePost: function (req, res, next) {
-    const PostInfo = req.body;
-    !PostInfo || PostInfo === {} ? res.status(400).json({ message: 'missing post data' }) : !PostInfo.text || PostInfo.text === '' ? res.status(400).json({ message: 'missing required text field'}) : next();
+    const PostInfo = Object.keys(req.body);
+
+    PostInfo.length === 0 || PostInfo === {} ? res.status(400).json({ message: 'Missing post data' }) : !req.body.text || PostInfo.text === '' ? res.status(400).json({ message: 'Missing required text field'}) : next();
   },
 
   validatePostID: function (req, res, next) {
@@ -42,6 +43,8 @@ module.exports = {
         res.status(404).json({message: 'The post with the specified ID does not exist'})
       }
     })
-    .catch(next)
+    .catch(err => {
+      res.status(500).json({errorMessage: 'There was a problem with the post'})
+    })
   }
 };
